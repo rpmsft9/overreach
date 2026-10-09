@@ -30,6 +30,28 @@ python -m overreach.cli inventory --out inv.json
 python -m overreach.cli scan --input inv.json
 ```
 
+### Fold in Defender CSPM (usage-based CIEM signals)
+
+Microsoft retired Entra Permissions Management (ex-CloudKnox); its CIEM analysis now
+surfaces as **Defender CSPM** recommendations for **stale/unused and over-permissioned
+identities** on Azure (and AWS/GCP) *resource* permissions — the usage-based signal
+`overreach`'s native checks only approximate. If you have Defender CSPM, pull those and
+merge them in (tagged `_Defender CSPM_` so they stay distinct from directory-role findings):
+
+```bash
+python -m overreach.cli dcspm --out dcspm.json                     # read-only Resource Graph pull
+python -m overreach.cli scan --input inv.json --dcspm dcspm.json   # directory roles + resource-plane CIEM
+```
+
+Offline, the same merge runs against the fixtures:
+
+```bash
+python -m overreach.cli scan --input fixtures/sample-tenant.json --dcspm fixtures/sample-dcspm.json
+```
+
+Scope split: `overreach`'s native OP1–OP6 cover **Entra directory roles**; DCSPM covers
+**resource / RBAC** permissions. Together they span both planes.
+
 ## The methodology (why this is more than a checkbox)
 
 "Over-privileged" means *holds more than they need* — and **"need" has no ground truth**.

@@ -1,0 +1,34 @@
+{
+  "source": "defender-cspm",
+  "_note": "Synthetic, normalized Defender CSPM CIEM recommendations for offline demo. No real data. In a live pull these come from Azure Resource Graph (microsoft.security/assessments).",
+  "assessments": [
+    {
+      "display_name": "Azure overprovisioned identities should have only the necessary permissions",
+      "status": "Unhealthy", "severity": "High",
+      "identity": "svc-analytics@contoso.com", "identity_type": "serviceprincipal",
+      "resource_id": "/subscriptions/0000/resourceGroups/rg-data",
+      "remediation": "Right-size role assignments to the permissions actually used in the last 90 days."
+    },
+    {
+      "display_name": "Unused identities in your Azure environment should be removed",
+      "status": "Unhealthy", "severity": "Medium",
+      "identity": "mi-legacy-job", "identity_type": "managedidentity",
+      "resource_id": "/subscriptions/0000/resourceGroups/rg-legacy",
+      "remediation": "Remove the unused managed identity and its role assignments."
+    },
+    {
+      "display_name": "Super identities in your Azure environment should be removed",
+      "status": "Unhealthy", "severity": "High",
+      "identity": "dave@contoso.com", "identity_type": "user",
+      "resource_id": "/subscriptions/0000",
+      "remediation": "Reduce this identity's effective permissions; it can perform nearly all actions in scope."
+    },
+    {
+      "display_name": "Stale accounts with owner permissions should be removed",
+      "status": "Unhealthy", "severity": "Medium",
+      "identity": "contractor-2024@contoso.com", "identity_type": "user",
+      "resource_id": "/subscriptions/0000/resourceGroups/rg-app",
+      "remediation": "Remove owner permissions from this stale account."
+    }
+  ]
+}

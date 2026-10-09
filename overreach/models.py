@@ -40,7 +40,7 @@ class Identity:
 
 @dataclass
 class Finding:
-    rule: str          # "OP1".."OP6"
+    rule: str          # "OP1".."OP6", or "DCSPM-*" for Defender CSPM-sourced findings
     title: str
     identity_id: str
     identity_upn: str
@@ -49,3 +49,5 @@ class Finding:
     amplifier: bool    # True = raises the danger of over-privilege, not over-privilege itself
     evidence: str
     remediation: str
+    source: str = "native"   # "native" (overreach's own checks on Entra directory roles)
+                             # | "defender-cspm" (resource/RBAC-plane CIEM recommendation)

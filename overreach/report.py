@@ -31,9 +31,10 @@ def to_markdown(tenant, findings):
         "",
     ]
     for f in findings:
-        amp = " · _amplifier_" if f.amplifier else ""
+        amp = " - _amplifier_" if f.amplifier else ""
+        src = " - _Defender CSPM_" if getattr(f, "source", "native") == "defender-cspm" else ""
         lines += [
-            f"## [{f.severity.upper()}] {f.rule} - {f.title}{amp}",
+            f"## [{f.severity.upper()}] {f.rule} - {f.title}{amp}{src}",
             f"- **Identity:** {f.identity_upn}",
             f"- **Confidence:** {f.confidence}",
             f"- **Evidence:** {f.evidence}",
