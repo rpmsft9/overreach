@@ -15,11 +15,12 @@ What it populates today:
     - MFA registration state (userRegistrationDetails)
 
 Documented TODOs (kept honest):
-    - Resolve role assignments whose principal is a GROUP into their transitive
-      members, tagging via="group:<name>" so OP5 fires on real tenants.
     - Populate owned_apps / owned_agents for the OP6 bridge (reuse nhi-scan's
-      Entra app/owner collector).
-Until then OP5/OP6 still demonstrate fully from the fixture.
+      Entra app/owner collector). Until then OP6 demonstrates from the fixture.
+
+Group-nested privilege IS resolved: a role whose principal is a group is expanded
+into the group's transitive user members, each tagged via="group:<name>", so OP5
+and the roles-report via-group column populate from a live tenant.
 """
 
 import json
@@ -104,20 +105,36 @@ def gather():
     except GraphError:
         pass  # leave default; note in output that MFA was not read
 
+    # Role assignments. A per-gather cache avoids re-expanding the same group.
+    group_cache = {}
     # Active (standing) role assignments.
     _attach_roles(
         "/roleManagement/directory/roleAssignmentScheduleInstances?$expand=roleDefinition,principal&$top=999",
-        token, by_id, assignment="active")
+        token, by_id, "active", group_cache)
     # Eligible (PIM) role assignments.
     _attach_roles(
         "/roleManagement/directory/roleEligibilityScheduleInstances?$expand=roleDefinition,principal&$top=999",
-        token, by_id, assignment="eligible")
+        token, by_id, "eligible", group_cache)
 
     identities = [r for r in by_id.values() if r["role_assignments"]]  # keep it focused on identities that hold roles
     return json.dumps({"tenant": tenant, "identities": identities}, indent=2)
 
 
-def _attach_roles(path, token, by_id, assignment):
+def _group_user_members(group_id, token, cache):
+    """Transitive USER members of a group (flattened across nesting), cached per gather."""
+    if group_id in cache:
+        return cache[group_id]
+    try:
+        members = _get_all(
+            f"/groups/{group_id}/transitiveMembers/microsoft.graph.user?$select=id&$top=999", token)
+        ids = [m["id"] for m in members if m.get("id")]
+    except GraphError:
+        ids = []
+    cache[group_id] = ids
+    return ids
+
+
+def _attach_roles(path, token, by_id, assignment, group_cache):
     try:
         rows = _get_all(path, token)
     except GraphError:
@@ -125,17 +142,26 @@ def _attach_roles(path, token, by_id, assignment):
     for row in rows:
         principal = row.get("principal") or {}
         role = (row.get("roleDefinition") or {}).get("displayName", "")
+        if not role:
+            continue
         pid = principal.get("id")
-        otype = principal.get("@odata.type", "")
-        if pid in by_id and role:
+        otype = (principal.get("@odata.type") or "").lower()
+        scope = row.get("directoryScopeId", "/")
+        if "group" in otype:
+            # Role assigned to a group: expand to transitive user members, tag via the group.
+            gname = principal.get("displayName") or pid
+            for uid in _group_user_members(pid, token, group_cache):
+                if uid in by_id:
+                    by_id[uid]["role_assignments"].append({
+                        "role": role, "assignment": assignment,
+                        "scope": scope, "via": f"group:{gname}",
+                    })
+        elif pid in by_id:
+            # Direct assignment to a user. (Service principals are nhi-scan's job, so skipped here.)
             by_id[pid]["role_assignments"].append({
-                "role": role,
-                "assignment": assignment,
-                "scope": row.get("directoryScopeId", "/"),
-                "via": "direct",
+                "role": role, "assignment": assignment,
+                "scope": scope, "via": "direct",
             })
-        # NOTE: if principal is a group (#microsoft.graph.group), expand transitiveMembers
-        # and attach via="group:<name>" so OP5 fires. TODO for M3+.
 
 
 def _days_since(iso):

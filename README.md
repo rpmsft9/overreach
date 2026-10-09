@@ -120,8 +120,11 @@ folds it in as the usage-based signal when you have it.
   real thing. Scope split worth stating: DCSPM covers **resource / RBAC** permissions, while
   `overreach`'s native checks cover **Entra directory roles** — the two are complementary, and
   together they cover both planes.
-- **Group-nesting resolution in the collector** so OP5 fires on real tenants (today it
-  resolves fully from a supplied inventory; the live collector marks it as a TODO).
+- ~~Group-nesting resolution in the collector~~ **done** — a role assigned to a group is
+  expanded into its transitive user members (tagged `via="group:<name>"`), so OP5 and
+  roles-report's via-group populate from a live tenant, not just a supplied inventory.
+- **owned_apps / owned_agents in the collector** so OP6 (the agent bridge) fires live
+  (today it resolves from a supplied inventory; reuse nhi-scan's Entra app/owner collector).
 - **Peer baselining** — flag users with far more entitlement than functional peers.
 - **Unified report** merging `overreach` (human) and `nhi-scan` (non-human) output.
 
