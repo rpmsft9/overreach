@@ -76,6 +76,29 @@ Design principles:
 - **Label amplifiers honestly** (OP4) so findings aren't overstated.
 - **Never claim a verdict you can't evidence.**
 
+## How this relates to Defender CSPM
+
+A fair question: if Defender CSPM already flags over-permissioned identities, why
+`overreach`? Because DCSPM is **one input**, and `overreach` is the layer around it.
+
+- **Different plane.** DCSPM's CIEM analyzes **resource / RBAC** permissions (Azure, AWS,
+  GCP). It does **not** assess **Entra directory roles** — Global Administrator, Privileged
+  Role Administrator, and the rest — which is where the most dangerous, tenant-takeover
+  privilege lives. `overreach`'s native OP1–OP6 target exactly that plane DCSPM leaves blind.
+- **Checks DCSPM doesn't run** on those roles: standing-vs-PIM-eligible (OP1), Global Admin
+  sprawl (OP2), dormant privileged accounts (OP3), privileged-without-MFA (OP4), and hidden
+  admin via nested groups (OP5).
+- **The agent bridge (OP6)** — connecting a human's privilege to the agents that inherit it
+  via OBO / ownership — is something no CIEM product models.
+- **Deterministic, explainable, and no license.** DCSPM is a paid plan and a black-box
+  verdict. `overreach` runs against any tenant with read-only Graph scopes, records the
+  evidence and confidence for every finding, and works where DCSPM isn't licensed.
+- **It unifies the picture** — directory-role findings (native) + resource-plane findings
+  (DCSPM, tagged by source) + non-human identities (via nhi-scan) in one risk model.
+
+In short: `overreach` **surrounds** DCSPM — it works without it, covers what it misses, and
+folds it in as the usage-based signal when you have it.
+
 ## Roadmap
 
 - **Usage-based right-sizing** — the strongest signal of all: compare *granted* vs.
