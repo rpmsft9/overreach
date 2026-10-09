@@ -1,0 +1,37 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "overreach"
+version = "0.1.0"
+description = "Audit Microsoft Entra ID for over-permissioned human identities — deterministic, explainable, read-only."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [{ name = "Raj Penchala" }]
+keywords = ["entra", "azure-ad", "least-privilege", "iam", "pim", "identity-governance", "security"]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Intended Audience :: Information Technology",
+  "Topic :: Security",
+  "Programming Language :: Python :: 3",
+  "Operating System :: OS Independent",
+]
+dependencies = []
+
+[project.optional-dependencies]
+dev = ["pytest>=8"]
+
+[project.scripts]
+overreach = "overreach.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/rpmsft9/overreach"
+Repository = "https://github.com/rpmsft9/overreach"
+
+[tool.setuptools]
+packages = ["overreach"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

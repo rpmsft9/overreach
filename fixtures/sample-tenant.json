@@ -1,0 +1,64 @@
+{
+  "tenant": "contoso.onmicrosoft.com",
+  "generated": "2026-10-08T00:00:00Z",
+  "_note": "Synthetic directory for offline demo. No real data. Each identity is crafted to exercise specific checks.",
+  "identities": [
+    {
+      "id": "u-alice", "upn": "alice@contoso.com", "display_name": "Alice Admin",
+      "enabled": true, "last_sign_in_days": 2, "mfa_registered": true,
+      "role_assignments": [{"role": "Global Administrator", "assignment": "active", "scope": "/", "via": "direct"}]
+    },
+    {
+      "id": "u-bob", "upn": "bob@contoso.com", "display_name": "Bob Stale",
+      "enabled": true, "last_sign_in_days": 120, "mfa_registered": false,
+      "role_assignments": [{"role": "Global Administrator", "assignment": "active", "scope": "/", "via": "direct"}]
+    },
+    {
+      "id": "u-carol", "upn": "carol@contoso.com", "display_name": "Carol Nested",
+      "enabled": true, "last_sign_in_days": 5, "mfa_registered": true,
+      "role_assignments": [{"role": "User Administrator", "assignment": "active", "scope": "/", "via": "group:Helpdesk Admins"}]
+    },
+    {
+      "id": "u-dave", "upn": "dave@contoso.com", "display_name": "Dave Sponsor",
+      "enabled": true, "last_sign_in_days": 1, "mfa_registered": true,
+      "role_assignments": [{"role": "Privileged Role Administrator", "assignment": "active", "scope": "/", "via": "direct"}],
+      "owned_apps": [{"app_id": "app-refunds-001", "name": "agent-refunds", "obo_capable": true}],
+      "owned_agents": ["agent-refunds-copilot"]
+    },
+    {
+      "id": "u-erin", "upn": "erin@contoso.com", "display_name": "Erin Admin",
+      "enabled": true, "last_sign_in_days": 7, "mfa_registered": true,
+      "role_assignments": [{"role": "Global Administrator", "assignment": "active", "scope": "/", "via": "direct"}]
+    },
+    {
+      "id": "u-mallory", "upn": "mallory@contoso.com", "display_name": "Mallory Eligible",
+      "enabled": true, "last_sign_in_days": 4, "mfa_registered": true,
+      "role_assignments": [{"role": "Global Administrator", "assignment": "eligible", "scope": "/", "via": "direct"}]
+    },
+    {
+      "id": "u-oscar", "upn": "oscar@contoso.com", "display_name": "Oscar Admin",
+      "enabled": true, "last_sign_in_days": 9, "mfa_registered": true,
+      "role_assignments": [{"role": "Global Administrator", "assignment": "active", "scope": "/", "via": "direct"}]
+    },
+    {
+      "id": "u-peggy", "upn": "peggy@contoso.com", "display_name": "Peggy Admin",
+      "enabled": true, "last_sign_in_days": 11, "mfa_registered": true,
+      "role_assignments": [{"role": "Global Administrator", "assignment": "active", "scope": "/", "via": "direct"}]
+    },
+    {
+      "id": "u-heidi", "upn": "heidi@contoso.com", "display_name": "Heidi Never",
+      "enabled": true, "last_sign_in_days": null, "mfa_registered": true,
+      "role_assignments": [{"role": "Exchange Administrator", "assignment": "active", "scope": "/", "via": "direct"}]
+    },
+    {
+      "id": "u-frank", "upn": "frank@contoso.com", "display_name": "Frank AppAdmin",
+      "enabled": true, "last_sign_in_days": 3, "mfa_registered": true,
+      "role_assignments": [{"role": "Application Administrator", "assignment": "active", "scope": "/", "via": "direct"}]
+    },
+    {
+      "id": "u-grace", "upn": "grace@contoso.com", "display_name": "Grace GoodCitizen",
+      "enabled": true, "last_sign_in_days": 1, "mfa_registered": true,
+      "role_assignments": [{"role": "User Administrator", "assignment": "eligible", "scope": "/", "via": "direct"}]
+    }
+  ]
+}
