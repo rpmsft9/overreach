@@ -31,6 +31,11 @@ def main(argv=None):
     d = sub.add_parser("dcspm", help="Gather Defender CSPM CIEM recommendations (read-only, needs az login).")
     d.add_argument("--out", required=True, help="Where to write the normalized DCSPM JSON.")
 
+    r = sub.add_parser("roles-report",
+                       help="List every role and everyone assigned to it (eligible/active and via-group resolved).")
+    r.add_argument("--input", required=True, help="Path to an inventory JSON (see fixtures/).")
+    r.add_argument("--format", choices=["md", "json", "csv"], default="md")
+
     args = parser.parse_args(argv)
 
     if args.cmd == "scan":
@@ -65,6 +70,19 @@ def main(argv=None):
         with open(args.out, "w", encoding="utf-8") as f:
             f.write(data)
         print(f"wrote {args.out}")
+        return 0
+
+    if args.cmd == "roles-report":
+        from . import rolesreport
+        tenant, identities = engine.load_inventory(args.input)
+        rows = rolesreport.build(identities)
+        if args.format == "md":
+            out = rolesreport.to_markdown(tenant, rows)
+        elif args.format == "json":
+            out = rolesreport.to_json(tenant, rows)
+        else:
+            out = rolesreport.to_csv(tenant, rows)
+        print(out)
         return 0
 
     return 1

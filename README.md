@@ -22,6 +22,14 @@ That runs against a synthetic directory, so you can see the output offline. JSON
 python -m overreach.cli scan --input fixtures/sample-tenant.json --format json
 ```
 
+Just want the flat "every role -> everyone assigned to it" report (the one Azure makes you
+assemble yourself), with eligible/active and via-group resolved? Markdown, JSON, or CSV:
+
+```bash
+python -m overreach.cli roles-report --input fixtures/sample-tenant.json
+python -m overreach.cli roles-report --input fixtures/sample-tenant.json --format csv > roles.csv
+```
+
 Against a real tenant (read-only; see **Safety**):
 
 ```bash
