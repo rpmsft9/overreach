@@ -10,10 +10,18 @@ join at the OBO bridge (OP6).
 
 No LLM in the verdict path. Every finding records its evidence and a confidence level.
 
+## Install
+
+```bash
+pip install overreach
+```
+
+Then run `overreach ...` (or `python -m overreach.cli ...` from a checkout).
+
 ## Quickstart (30 seconds, no tenant needed)
 
 ```bash
-python -m overreach.cli scan --input fixtures/sample-tenant.json
+overreach scan --input fixtures/sample-tenant.json
 ```
 
 That runs against a synthetic directory, so you can see the output offline. JSON too:

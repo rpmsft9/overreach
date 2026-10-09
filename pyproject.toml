@@ -14,8 +14,13 @@ keywords = ["entra", "azure-ad", "least-privilege", "iam", "pim", "identity-gove
 classifiers = [
   "Development Status :: 3 - Alpha",
   "Intended Audience :: Information Technology",
+  "Intended Audience :: System Administrators",
   "Topic :: Security",
+  "Topic :: System :: Systems Administration :: Authentication/Directory",
   "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
   "Operating System :: OS Independent",
 ]
 dependencies = []
@@ -29,6 +34,8 @@ overreach = "overreach.cli:main"
 [project.urls]
 Homepage = "https://github.com/rpmsft9/overreach"
 Repository = "https://github.com/rpmsft9/overreach"
+Issues = "https://github.com/rpmsft9/overreach/issues"
+Changelog = "https://github.com/rpmsft9/overreach/blob/main/CHANGELOG.md"
 
 [tool.setuptools]
 packages = ["overreach"]
