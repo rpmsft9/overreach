@@ -57,9 +57,16 @@ Design principles:
 ## Roadmap
 
 - **Usage-based right-sizing** — the strongest signal of all: compare *granted* vs.
-  *actually-used* permissions from the directory audit log. Needs per-action telemetry;
-  strong for Azure RBAC (cf. Entra Permissions Management), weaker-but-usable for
-  directory roles. OP3 (dormancy) is the MVP proxy.
+  *actually-used* permissions. Needs per-action telemetry. OP3 (dormancy) is the MVP proxy.
+- **Pull Defender CSPM (DCSPM) CIEM signals.** Microsoft retired Entra Permissions
+  Management (ex-CloudKnox) as a standalone product; its CIEM analysis now surfaces as
+  **Microsoft Defender CSPM recommendations** that flag **stale/unused and over-permissioned
+  identities** across Azure (and AWS/GCP) resource permissions. `overreach` can ingest these
+  — via Azure Resource Graph over `Microsoft.Security/assessments`, or the Defender for Cloud
+  assessments API — and fold them in, upgrading the usage-based signal from a proxy to the
+  real thing. Scope split worth stating: DCSPM covers **resource / RBAC** permissions, while
+  `overreach`'s native checks cover **Entra directory roles** — the two are complementary, and
+  together they cover both planes.
 - **Group-nesting resolution in the collector** so OP5 fires on real tenants (today it
   resolves fully from a supplied inventory; the live collector marks it as a TODO).
 - **Peer baselining** — flag users with far more entitlement than functional peers.
