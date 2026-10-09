@@ -15,12 +15,14 @@ What it populates today:
     - MFA registration state (userRegistrationDetails)
 
 Documented TODOs (kept honest):
-    - Populate owned_apps / owned_agents for the OP6 bridge (reuse nhi-scan's
-      Entra app/owner collector). Until then OP6 demonstrates from the fixture.
-
 Group-nested privilege IS resolved: a role whose principal is a group is expanded
 into the group's transitive user members, each tagged via="group:<name>", so OP5
 and the roles-report via-group column populate from a live tenant.
+
+OP6 bridge inputs ARE populated: each user's owned app registrations (flagged
+obo_capable when the app requests delegated permissions) and their Agent 365
+registrations (owned_agents, via the beta registry; skipped silently where Agent
+365 is not present).
 """
 
 import json
@@ -29,6 +31,7 @@ import urllib.error
 import urllib.request
 
 GRAPH = "https://graph.microsoft.com/v1.0"
+GRAPH_BETA = "https://graph.microsoft.com/beta"
 
 
 class GraphError(RuntimeError):
@@ -52,9 +55,9 @@ def _token():
         raise GraphError(f"'az account get-access-token' failed: {e.stderr.strip()}")
 
 
-def _get_all(path, token):
+def _get_all(path, token, base=GRAPH):
     """GET a Graph collection, following @odata.nextLink. Returns list of items."""
-    url = f"{GRAPH}{path}"
+    url = f"{base}{path}"
     items = []
     while url:
         req = urllib.request.Request(url, headers={"Authorization": f"Bearer {token}"})
@@ -116,8 +119,65 @@ def gather():
         "/roleManagement/directory/roleEligibilityScheduleInstances?$expand=roleDefinition,principal&$top=999",
         token, by_id, "eligible", group_cache)
 
+    # OP6 bridge inputs: owned OBO-capable apps, and sponsored/owned agents.
+    _attach_owned_apps(token, by_id)
+    _attach_agents(token, by_id)
+
     identities = [r for r in by_id.values() if r["role_assignments"]]  # keep it focused on identities that hold roles
     return json.dumps({"tenant": tenant, "identities": identities}, indent=2)
+
+
+def _is_obo_capable(app):
+    """Heuristic: an app is OBO-capable if it requests any *delegated* permission (a Scope),
+    i.e. it can act on behalf of a signed-in user. App-only (Role) permissions alone are not OBO."""
+    for rra in app.get("requiredResourceAccess", []) or []:
+        for ra in rra.get("resourceAccess", []) or []:
+            if ra.get("type") == "Scope":
+                return True
+    return False
+
+
+def _attach_owned_apps(token, by_id):
+    """Attach each user's owned app registrations, flagged obo_capable.
+
+    Uses $expand=owners (returns up to 20 owners per app; enough for the common case).
+    """
+    try:
+        apps = _get_all(
+            "/applications?$expand=owners&$select=id,appId,displayName,requiredResourceAccess&$top=999",
+            token)
+    except GraphError:
+        return
+    for app in apps:
+        entry = {
+            "app_id": app.get("appId", ""),
+            "name": app.get("displayName", ""),
+            "obo_capable": _is_obo_capable(app),
+        }
+        for owner in app.get("owners", []) or []:
+            # owners are directoryObjects; only attribute human owners (users).
+            if (owner.get("@odata.type") or "").lower().endswith("user") and owner.get("id") in by_id:
+                by_id[owner["id"]]["owned_apps"].append(dict(entry))
+
+
+def _attach_agents(token, by_id):
+    """Best-effort: attach Agent 365 registrations to their owners (owned_agents).
+
+    Uses the beta Agent 365 registry (preview). Skips silently where unavailable, so
+    tenants without Agent 365 simply get no owned_agents rather than an error.
+    """
+    try:
+        regs = _get_all("/copilot/agentRegistrations?$top=999", token, base=GRAPH_BETA)
+    except GraphError:
+        return
+    for reg in regs:
+        name = reg.get("displayName") or reg.get("sourceAgentId") or "agent"
+        owners = list(reg.get("ownerIds", []) or [])
+        if reg.get("createdBy"):
+            owners.append(reg["createdBy"])
+        for oid in set(owners):
+            if oid in by_id and name not in by_id[oid]["owned_agents"]:
+                by_id[oid]["owned_agents"].append(name)
 
 
 def _group_user_members(group_id, token, cache):
