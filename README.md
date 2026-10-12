@@ -117,24 +117,23 @@ folds it in as the usage-based signal when you have it.
 
 ## Roadmap
 
-- **Usage-based right-sizing** — the strongest signal of all: compare *granted* vs.
-  *actually-used* permissions. Needs per-action telemetry. OP3 (dormancy) is the MVP proxy.
-- **Pull Defender CSPM (DCSPM) CIEM signals.** Microsoft retired Entra Permissions
-  Management (ex-CloudKnox) as a standalone product; its CIEM analysis now surfaces as
-  **Microsoft Defender CSPM recommendations** that flag **stale/unused and over-permissioned
-  identities** across Azure (and AWS/GCP) resource permissions. `overreach` can ingest these
-  — via Azure Resource Graph over `Microsoft.Security/assessments`, or the Defender for Cloud
-  assessments API — and fold them in, upgrading the usage-based signal from a proxy to the
-  real thing. Scope split worth stating: DCSPM covers **resource / RBAC** permissions, while
-  `overreach`'s native checks cover **Entra directory roles** — the two are complementary, and
-  together they cover both planes.
-- ~~Group-nesting resolution in the collector~~ **done** — a role assigned to a group is
-  expanded into its transitive user members (tagged `via="group:<name>"`), so OP5 and
-  roles-report's via-group populate from a live tenant, not just a supplied inventory.
-- ~~owned_apps / owned_agents in the collector~~ **done** — the collector attaches each
-  user's owned app registrations (flagged `obo_capable` when the app requests delegated
-  permissions) and their Agent 365 registrations, so OP6 (the agent bridge) fires from a
-  live tenant. Agent 365 is preview, so that part is best-effort and skipped where absent.
+**Shipped**
+
+- **Defender CSPM ingestion** — pull DCSPM CIEM recommendations (stale / over-permissioned
+  identities) via Azure Resource Graph and merge them with the native checks. See
+  *How this relates to Defender CSPM* above.
+- **Group-nesting resolution in the collector** — a role assigned to a group is expanded
+  into its transitive user members (tagged `via="group:<name>"`), so OP5 and roles-report's
+  via-group populate from a live tenant, not just a supplied inventory.
+- **owned_apps / owned_agents in the collector** — attaches each user's owned OBO-capable
+  app registrations and Agent 365 registrations, so OP6 (the agent bridge) fires from a live
+  tenant. Agent 365 is preview, so that part is best-effort and skipped where absent.
+
+**Planned**
+
+- **Usage-based right-sizing for directory roles** — compare *granted* vs. *actually-used*
+  permissions. Needs per-action telemetry; OP3 (dormancy) is the MVP proxy today. (DCSPM
+  already supplies this signal for the resource plane.)
 - **Peer baselining** — flag users with far more entitlement than functional peers.
 - **Unified report** merging `overreach` (human) and `nhi-scan` (non-human) output.
 
